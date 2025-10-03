@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>בקשת שחזור - סטייל YouFinder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap');
+        :root {
+            --bg-body: #0d1117;
+            --bg-card: #161b22;
+            --text-color: #c9d1d9;
+            --border-color: #30363d;
+            --input-bg: #0d1117;
+            --input-border-focus: #58a6ff;
+            --header-color: #ffffff;
+            --success-color: #38a169;
+            --error-color: #e53e3e;
+            --button-primary-bg: #238636; 
+            --button-primary-hover: #2ea043;
+            --checkbox-border: #4a5568;
+            --checkbox-checked-bg: #238636;
+            --checkbox-checkmark-color: #ffffff;
+        }
+
+        .light-mode {
+            --bg-body: #f0f6fc;
+            --bg-card: #ffffff;
+            --text-color: #24292f;
+            --border-color: #d0d7de;
+            --input-bg: #ffffff;
+            --input-border-focus: #0969da;
+            --header-color: #24292f;
+            --success-color: #2f855a;
+            --error-color: #c53030;
+            --button-primary-bg: #216e39; 
+            --button-primary-hover: #2da44e;
+            --checkbox-border: #a0aec0;
+            --checkbox-checked-bg: #216e39;
+        }
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-color);
+            direction: rtl;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .main-card {
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            opacity: 0;
+            transform: scale(0.95);
+            width: 40%;
+        }
+        .body-loaded .main-card {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .header-title {
+            color: var(--header-color);
+            transition: color 0.3s ease;
+        }
+
+        input[type="text"], textarea {
+            background-color: var(--input-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            resize: vertical;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--input-border-focus);
+            box-shadow: 0 0 0 2px var(--input-border-focus);
+            outline: none;
+        }
+
+        .custom-checkbox input[type="checkbox"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--checkbox-border);
+            border-radius: 4px;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s, border-color 0.2s;
+            display: inline-block;
+            vertical-align: middle;
+            position: relative;
+        }
+        .custom-checkbox input[type="checkbox"]:checked {
+            background-color: var(--checkbox-checked-bg);
+            border-color: var(--checkbox-checked-bg);
+        }
+        .custom-checkbox input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px; 
+            left: 5px;
+            width: 5px;
+            height: 10px;
+            border: solid var(--checkbox-checkmark-color);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .message-success {
+            color: var(--success-color);
+        }
+        .message-error {
+            color: var(--error-color);
+        }
+        .message-loading {
+             color: var(--text-color);
+        }
+
+        .loader {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--input-border-focus);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="max-w-7xl mx-auto main-card p-8 rounded-lg shadow-xl border">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold header-title flex items-center gap-2">
+                בקשת שיחזור סרטונים
+            </h1>
+            <button id="modeToggle" class="p-2 rounded-full bg-gray-700 text-white transition-all duration-300 hover:bg-gray-600 transform hover:scale-110" aria-label="החלף מצב לילה/יום">
+                <svg id="sunIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="moonIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+        </div>
+
+        <form id="restoreForm" class="flex flex-col gap-4">
+            
+            <label for="username" class="text-sm font-semibold flex items-center gap-1">שם משתמש (לא חובה) </label>
+            <input type="text" id="username" name="username" placeholder="השם יופיע בקרדיט אם תבחרו" class="flex-1 px-4 py-3 rounded-lg border focus:outline-none focus:ring-2">
+            
+            <label for="request" class="text-sm font-semibold flex items-center gap-1">הבקשה לסרטון (חובה לפחות להגיד את שם הערוץ ומה אתה רוצה להחזיר באותו הערוץ) </label>
+            <textarea id="request" name="request" rows="5" required placeholder="מה אתה רוצה שנחפש ונעלה" class="flex-1 px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"></textarea>
+            
+            <div class="custom-checkbox flex items-center gap-2 mt-2">
+                <input type="checkbox" id="addCredit" name="addCredit" class="w-5 h-5">
+                <label for="addCredit" class="text-sm cursor-pointer">להוסיף קרדיט בתיאור? (מחייב שם משתמש)</label>
+            </div>
+
+            <button type="submit" id="submitButton" class="px-4 py-3 rounded-lg bg-[--button-primary-bg] text-white font-semibold transition-all duration-200 hover:bg-[--button-primary-hover] focus:outline-none focus:ring-2 focus:ring-[--button-primary-bg] transform hover:scale-103 mt-4 flex items-center justify-center gap-2">
+                שלח בקשה לצוות!
+            </button>
+            
+        </form>
+
+        <div id="messageContainer" class="mt-8 text-center text-lg hidden p-4 rounded-lg">
+        </div>
+    </div>
+
+    <script>
+        const encodedWebhookUrl = 'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQyMzYxMzA0NjEwNTk2NDU5NS92dXZGRWRVNDJFMmNMN3RlaHpkS3pfdi0wc0FOUDVUZGtRXzFJeHNpcmZJRlRMQldlSEFCWWRVaWhfOU9QVW9EVnZ0Vw=='; 
+        
+        const COOLDOWN_SECONDS = 60; 
+        let lastSubmissionTime = 0;
+
+        const form = document.getElementById('restoreForm');
+        const usernameInput = document.getElementById('username');
+        const requestInput = document.getElementById('request');
+        const addCreditCheckbox = document.getElementById('addCredit');
+        const messageContainer = document.getElementById('messageContainer');
+        const body = document.body;
+        const modeToggle = document.getElementById('modeToggle');
+        const moonIcon = document.getElementById('moonIcon');
+        const sunIcon = document.getElementById('sunIcon');
+        const submitButton = document.getElementById('submitButton');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                body.classList.add('body-loaded');
+            }, 50); 
+        });
+        
+        function setMode(isLight) {
+            if (isLight) {
+                body.classList.add('light-mode');
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+                localStorage.setItem('mode', 'light');
+            } else {
+                body.classList.remove('light-mode');
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+                localStorage.setItem('mode', 'dark');
+            }
+        }
+
+        const savedMode = localStorage.getItem('mode') || 'dark';
+        setMode(savedMode === 'light');
+
+        modeToggle.addEventListener('click', () => {
+            const isLight = body.classList.contains('light-mode');
+            setMode(!isLight);
+        });
+
+        function showMessage(text, type) {
+            messageContainer.classList.remove('hidden', 'message-success', 'message-error', 'message-loading', 'bg-red-900/20', 'bg-green-900/20', 'bg-gray-900/20');
+            
+            let bgColor = '';
+            if (type === 'success') bgColor = 'bg-green-900/20';
+            else if (type === 'error') bgColor = 'bg-red-900/20';
+            else bgColor = 'bg-gray-900/20';
+
+            messageContainer.innerHTML = text;
+            messageContainer.classList.add(`message-${type}`, bgColor);
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    messageContainer.classList.add('hidden');
+                }, 5000);
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+            
+            const now = Date.now();
+            const timeSinceLastSubmission = (now - lastSubmissionTime) / 1000;
+
+            if (timeSinceLastSubmission < COOLDOWN_SECONDS) {
+                const timeLeft = Math.ceil(COOLDOWN_SECONDS - timeSinceLastSubmission);
+                showMessage(`חייבים לחכות! ⏳ נסה שוב בעוד ${timeLeft} שניות.`, 'error');
+                return;
+            }
+
+            const username = usernameInput.value.trim();
+            const requestText = requestInput.value.trim();
+            const addCredit = addCreditCheckbox.checked;
+            
+            if (!requestText) {
+                showMessage('חובה לכתוב מה אתה רוצה שנחפש! 📝', 'error');
+                return;
+            }
+
+            if (addCredit && !username) {
+                showMessage('כדי לקבל קרדיט, חובה להזין שם משתמש/כינוי!', 'error');
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<div class="loader w-6 h-6 border-2"></div> שולח...';
+            showMessage('שולח את הבקשה... ⏳', 'loading');
+
+            const webhookUrl = atob(encodedWebhookUrl);
+            
+            const creditString = addCredit ? `ביקש קרדיט בתיאור` : 'לא ביקש קרדיט בתיאור';
+            const finalUsername = username || 'אנונימי/לא הוזן שם';
+
+            const payload = {
+                username: "בקשות", 
+                embeds: [{
+                    title: "בקשת שחזור סרטון חדשה ",
+                    description: `**שם המבקש:** \`${finalUsername}\`\n ${creditString}`,
+                    fields: [
+                        {
+                            name: "הבקשה לסרטון:",
+                            value: requestText,
+                            inline: false
+                        }
+                    ],
+                    color: 16752384, 
+                    timestamp: new Date().toISOString(), 
+                    footer: {
+                        text: "בקשות",
+                    }
+                }]
+            };
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (response.ok) {
+                    showMessage('הבקשה נשלחה בהצלחה! הצוות יבדוק את זה.', 'success');
+                    form.reset();
+                    lastSubmissionTime = now;
+                } else {
+                    const errorText = await response.text();
+                    console.error('Webhook Error:', response.status, errorText);
+                    showMessage(`שגיאה בשליחה! קוד: ${response.status}.`, 'error');
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                showMessage('שגיאת רשת! לא הצלחנו לשלוח את הבקשה...', 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'שלח בקשה לצוות! ✅';
+            }
+        });
+    </script>
+
+</body>
+</html>
